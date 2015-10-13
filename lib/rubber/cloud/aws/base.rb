@@ -202,6 +202,19 @@ module Rubber
         return lbs
       end
 
+      def describe_ssl_certificates
+        r = iam_provider.list_server_certificates
+
+        r.body['Certificates'].map do |certificate|
+          {
+            :arn => certificate['Arn'],
+            :path => certificate['Path'],
+            :id => certificate['ServerCertificateId'],
+            :name => certificate['ServerCertificateName']
+          }
+        end
+      end
+
       def describe_availability_zones
         zones = []
         response = compute_provider.describe_availability_zones()
@@ -315,6 +328,16 @@ module Rubber
       def elb_provider
         if @compute_credentials
           @elb_provider ||= ::Fog::AWS::ELB.new(
+            @compute_credentials.select { |k| k.to_s != 'provider' }
+          )
+        else
+          nil
+        end
+      end
+
+      def iam_provider
+        if @compute_credentials
+          @iam_provider ||= ::Fog::AWS::IAM.new(
             @compute_credentials.select { |k| k.to_s != 'provider' }
           )
         else
