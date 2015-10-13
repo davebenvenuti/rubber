@@ -1,44 +1,28 @@
 namespace :rubber do
-
-  #desc <<-DESC
-  #  Sets up the network load balancers
-  #DESC
-  #required_task :setup_load_balancers do
-  #  setup_load_balancers()
-  #end
-  #
-  #desc <<-DESC
-  #  Describes the network load balancers
-  #DESC
-  #required_task :describe_load_balancers do
-  #  lbs = cloud.describe_load_balancers()
-  #  pp lbs
-  #end
-
-  def setup_load_balancers
-    # OPTIONAL: Automatically provision and assign instances to a Cloud provided
-    # load balancer.
-    #load_balancers:
-    #  my_lb_name:
-    #    listeners:
-    #      - protocol: http
-    #        port: 80
-    #        instance_port: 8080
-    #      - protocol: tcp
-    #        port: 443
-    #        instance_port: 8080
-    #    target_roles: [app]
-    #
-    #isolate_load_balancers: true
-
-
-
-    # get remote lbs
-    # for each local not in remote, add it
-    #   get all zones for all instances for roles, and make sure in lb
-    #   warn if lb not balanced (count of instances per zone is equal)
-    # for each local that is in remote, sync listeners and zones
-    # for each remote not in local, remove it
+  required_task :create_load_balancer do
   end
 
+  required_task :describe_load_balancers do
+    load_balancers = cloud.describe_load_balancers
+
+    if load_balancers.length > 0
+      puts "Load Balancers:"
+      load_balancers.each do |load_balancer|
+        puts "\t#{load_balancer[:name]}"
+        puts "\t\t#{load_balancer[:dns_name]}"
+        puts "\t\t#{load_balancer[:zones].join(',')}"
+        puts "\t\t#{load_balancer[:vpc_id]}" if load_balancer[:vpc_id]
+        puts "\t\tListeners:"
+        load_balancer[:listeners].each do |listener|
+          puts "\t\t\t#{listener[:protocol]} #{listener[:port]}:#{listener[:instance_port]}"
+        end
+      end
+    else
+      puts "No load balancers found"
+    end
+  end
+
+  required_task :destroy_load_balancer do
+  end
 end
+
