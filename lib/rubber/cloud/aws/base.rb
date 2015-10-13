@@ -23,12 +23,9 @@ module Rubber
         @table_store = ::Fog::AWS::SimpleDB.new(compute_credentials)
         
         compute_credentials[:region] = env.region
-        @elb = ::Fog::AWS::ELB.new(compute_credentials)
-
         compute_credentials[:provider] = 'AWS' # We need to set the provider after the SimpleDB init because it fails if the provider value is specified.
 
         storage_credentials[:region] = env.region
-
         env['compute_credentials'] = compute_credentials
         env['storage_credentials'] = storage_credentials
         super(env, capistrano)
@@ -310,6 +307,16 @@ module Rubber
         tags.each do |k, v|
           compute_provider.tags.create(:resource_id => resource_id,
                                         :key => k.to_s, :value => v.to_s)
+        end
+      end
+
+      def elb_provider
+        if @compute_credentials
+          @elb_provider ||= ::Fog::AWS::ELB.new(
+            @compute_credentials.select { |k| k.to_s != 'provider' }
+          )
+        else
+          nil
         end
       end
     end
