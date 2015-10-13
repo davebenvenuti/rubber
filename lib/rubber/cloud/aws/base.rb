@@ -185,6 +185,7 @@ module Rubber
           lb[:name] = item.id
           lb[:dns_name] = item.dns_name
           lb[:zones] = item.availability_zones
+          lb[:vpc_id] = item.vpc_id if item.vpc_id
 
           item.listeners.each do |litem|
             listener = {}
