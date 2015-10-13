@@ -179,7 +179,7 @@ module Rubber
 
       def describe_load_balancers(name=nil)
         lbs = []
-        response = name.nil? ? @elb.load_balancers.all() : [@elb.load_balancers.get(name)].compact
+        response = name.nil? ? elb_provider.load_balancers.all() : [elb_provider.load_balancers.get(name)].compact
         response.each do |item|
           lb = {}
           lb[:name] = item.id
@@ -189,7 +189,7 @@ module Rubber
           item.listeners.each do |litem|
             listener = {}
             listener[:protocol] = litem.protocol
-            listener[:port] = litem.lb_portPort
+            listener[:port] = litem.lb_port
             listener[:instance_port] = litem.instance_port
             lb[:listeners] ||= []
             lb[:listeners] << listener
@@ -197,6 +197,7 @@ module Rubber
 
           lbs << lb
         end
+
         return lbs
       end
 
