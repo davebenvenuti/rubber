@@ -3,11 +3,19 @@ namespace :rubber do
     env = rubber_cfg.environment.bind(nil, nil)
     cloud_env = env.cloud_providers[env.cloud_provider]
 
-    name = get_env("NAME", "Name (alphanumeric and dashes only): ", true)
-    zones = get_env("ZONES", "Availability Zones (comma delimited): ", true, cloud_env.availability_zone)
-    vpc_id = get_env("VPC", "Vpc Id: ", false, nil)
+    name = get_env("NAME", "Name (alphanumeric and dashes only)", true)
+    zones = get_env("ZONES", "Availability Zones (comma delimited)", true, cloud_env.availability_zone)
+    vpc_id = get_env("VPC", "Vpc Id or Rubber Alias", false, nil)
     if vpc_id
-      subnet_ids = get_env("SUBNET_IDS", "Subnet Ids (comman delimited): ", true)
+      unless vpc_id =~ /^vpc-.*$/
+        vpc_alias = vpc_id
+        # Convert the alias to a vpc
+        vpc = cloud.describe_vpcs.find { |vpc| vpc.tags['RubberAlias'] == vpc_id }
+        vpc_id = vpc.id
+        logger.info "Using #{vpc_id} for #{vpc_alias}"
+      end
+
+      subnet_ids = get_env("SUBNET_IDS", "Subnet Ids (comma delimited)", true)
     end
 
     opts = {
@@ -105,6 +113,14 @@ namespace :rubber do
     else
       puts "No SSL Certificates found"
     end
+  end
+
+  required_task :add_instance_to_load_balancer do
+    
+  end
+
+  required_task :remove_instance_from_load_balancer do
+    
   end
 end
 
