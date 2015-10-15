@@ -299,7 +299,11 @@ namespace :rubber do
   DESC
   required_task :setup_dns_aliases do
     rubber_instances.each do |ic|
-      update_dyndns(ic)
+      if ic.external_ip      
+        update_dyndns(ic)
+      else
+        logger.info "skipping #{ic.name} due to lack of external ip"
+      end
     end
   end
 
